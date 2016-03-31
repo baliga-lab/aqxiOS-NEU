@@ -1,0 +1,22 @@
+input[readonly]:not(.cloned-text-input)
+{
+    background-color: inherit;
+    cursor: pointer;
+}
+
+img {
+    width: 100px;
+    height: auto;
+}
+
+.row {
+    flex-flow: row wrap;
+}
+
+.col-25 {
+    padding: 5px;
+}
+
+.col-25 > .button.button-block {
+    margin: 0px;
+}

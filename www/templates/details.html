@@ -1,0 +1,17 @@
+<link href="css/details.css" rel="stylesheet">
+<ion-view>
+    <ion-tabs class="tabs-positive">
+        <ion-tab title="Dashboard" ng-click="toDashboard(systemID)">
+            <ion-nav-view name="dashboard"></ion-nav-view>
+        </ion-tab>
+        <ion-tab title="Analytics" ng-click="toAnalytics(systemID)">
+            <ion-nav-view name="analytics"></ion-nav-view>
+        </ion-tab>
+        <ion-tab title="Social" ng-click="toSocial(systemID)">
+            <ion-nav-view name="social"></ion-nav-view>
+        </ion-tab>
+        <ion-tab title="Settings" ng-click="toSettings(systemID)">
+            <ion-nav-view name="settings"></ion-nav-view>
+        </ion-tab>
+    </ion-tabs>
+</ion-view>

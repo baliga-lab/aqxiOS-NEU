@@ -1,0 +1,10 @@
+<ion-view>
+    <ion-header-bar class="bar-dark">
+        <h1 class="title">My Systems</h1>
+    </ion-header-bar>
+    <ion-content>
+        <ion-list>
+            <ion-item ng-repeat="system in systems" ng-bind="system.name" ng-click="viewSystem(system.ID)" menu-close></ion-item>
+        </ion-list>
+    </ion-content>
+</ion-view>

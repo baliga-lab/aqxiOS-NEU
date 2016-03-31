@@ -1,0 +1,9 @@
+<ion-view>
+    <ion-nav-title>Analytics</ion-nav-title>
+    <ion-content ng-show="systemID">
+        Analytics
+    </ion-content>
+    <ion-pane ng-hide="systemID">
+        <h4 class="background-message" ng-bind="missingSystemMessage"></h4>
+    </ion-pane>
+</ion-view>
