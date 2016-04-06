@@ -14,7 +14,7 @@
             }
             if (window.StatusBar) {
                 // org.apache.cordova.statusbar required
-                StatusBar.style(1);
+                StatusBar.styleLightContent();
             }
         });
     });
@@ -97,6 +97,16 @@
                     controller: 'SubmissionController'
                 }
             }
+        });
+        
+        $stateProvider.state('main.systems.edit', {
+            url: '/edit',
+            views: {
+                'details': {
+                    templateUrl: 'templates/edit-system.html',
+                    controller: 'EditSystemController'
+                }
+            } 
         });
         
         $urlRouterProvider.otherwise('/portal');
