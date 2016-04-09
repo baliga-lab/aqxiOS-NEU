@@ -154,12 +154,15 @@
         }
         
         function getLux(imageURI, exif) {
-            
+            console.log(imageURI);
+            console.log(exif);
+            return 0;
         }
 
         $scope.launchLightMeter = function() {
             function onSuccess(data) {
-                CordovaExif.readData(imageURI, function(exif) { getLux(imageURI, exif); });
+                var pdata = JSON.parse(data);
+                $scope.reading.value = getLux(pdata.filename, pdata.json_metadata);
             }
             function onFailure(error) {
                 $log.error(error);
