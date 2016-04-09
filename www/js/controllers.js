@@ -4,26 +4,26 @@
 
     var app = angular.module('aqx');
 
-    app.controller('PortalController', function($scope, $log, $state, $cordovaOauth) {
+    app.controller('PortalController', function($scope, $log, $state, $cordovaOauth, $cookies) {
 
         var clientID = '651960916780-76h7karv1iprib1jo747tvlv98mbch65.apps.googleusercontent.com';
         var fields = ['profile', 'email', 'openid'];
 
         $scope.login = function() {
-            function onSuccess(result) {
+            function onSuccess(cookie) {
                 $log.debug(result);
+                $cookies.put('accessToken', cookie.access_token, { expires: new Date() + cookie.expires_in * 1000 });
                 $state.go('main.systems.dashboard');
             }
             function onFailure(error) {
                 $log.error(error);
             }
-            // $state.go('main.systems.dashboard');
             $cordovaOauth.google(clientID, fields).then(onSuccess, onFailure);
         };
     });
 
     app.controller('MainController', function($scope, $log) {
-
+        
     });
 
     app.controller('DetailsController', function($scope, $log, $stateParams, $state) {
@@ -133,13 +133,14 @@
 
     });
 
-    app.controller('SettingsController', function($scope, $log, $stateParams, $state, $ionicHistory) {
+    app.controller('SettingsController', function($scope, $log, $stateParams, $state, $ionicHistory, $cookies) {
 
         $scope.logout = function() {
             $ionicHistory.clearHistory();
             $ionicHistory.nextViewOptions({
                 historyRoot: true,
             });
+            $cookies.remove('accessToken');
             $state.go('portal');
         };
     });

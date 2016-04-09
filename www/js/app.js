@@ -2,7 +2,7 @@
     
     'use strict';
     
-    var app = angular.module('aqx', ['ionic', 'ngCordova', 'ngCordovaOauth']);
+    var app = angular.module('aqx', ['ionic', 'ngCordova', 'ngCordovaOauth', 'ngCookies']);
     
     app.run(function ($ionicPlatform) {
 
@@ -109,7 +109,9 @@
             } 
         });
         
-        $urlRouterProvider.otherwise('/portal');
+        $urlRouterProvider.otherwise(function($cookies) {
+            $cookies.get('accessToken') ? '/main/systems//dashboard' : '/portal';
+        });
     });
     
 })();
