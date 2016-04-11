@@ -9,7 +9,7 @@ To compile:
 
 1. at root project directory, run `ionic state restore`
 2. go to plugins/cordova-plugin-camera-with-exif/src/ios/CDVCamera.m then 
-put `#import <Cordova/NSArray+Comparisons.h>` and #import `<Cordova/NSDictionary+Extensions.h>` to `#ifndef __CORDOVA_4_0_0` block
+put `#import <Cordova/NSArray+Comparisons.h>` and `#import <Cordova/NSDictionary+Extensions.h>` to `#ifndef __CORDOVA_4_0_0` block
 so that it appears like the following:
 
         #import "CDVCamera.h"
