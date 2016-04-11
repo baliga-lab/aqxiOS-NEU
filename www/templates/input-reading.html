@@ -1,0 +1,24 @@
+<link href="css/input-reading.css" rel="stylesheet">
+<ion-view>
+    <ion-nav-title>Input Reading</ion-nav-title>
+    <ion-content>
+        <form class="list">
+            <label class="item item-input">
+                <span class="input-label">Reading</span>
+                <input type="number" ng-model="reading.value">
+            </label>
+            <label class="item item-input">
+                <span class="input-label">Date</span>
+                <input type="date" ng-model="reading.date">
+            </label>
+            <label class="item item-input">
+                <span class="input-label">Time</span>
+                <input type="time" ng-model="reading.time">
+            </label>
+            <div class="padding">
+                <a class="button button-positive button-block" ng-click="launchLightMeter()" ng-show="type == 'Light'">Launch Light Meter</a>
+                <a class="button button-positive button-block" ng-click="submitReading(reading)">Submit</a>
+            </div>
+        </form>
+    </ion-content>
+</ion-view>

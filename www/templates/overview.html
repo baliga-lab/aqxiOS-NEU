@@ -1,0 +1,29 @@
+<link href="css/overview.css" rel="stylesheet">
+<ion-view>
+    <ion-nav-title ng-bind="system.name"></ion-nav-title>
+    <ion-nav-buttons side="right">
+        <a class="button button-icon icon" ng-click="inputAnnotation()"><i class="fa fa-flag fa-lg"></i></a>
+    </ion-nav-buttons>
+    <ion-content ng-show="systemID">
+        <form class="list">
+            <ion-item class="item-divider">Overview</ion-item>
+            <label class="item item-input">
+                <span class="input-label">Technique</span>
+                <input type="text" ng-value="system.technique" readonly />
+            </label>
+            <ion-item class="item-divider">Readings</ion-item>
+            <ion-item ng-repeat="reading in system.readings" ng-click="inputReading(reading.name)">
+                <span ng-bind="reading.name"></span>
+                <span class="item-note"><span ng-bind="reading.value | number:2"></span> <span ng-bind="reading.unit"></span></span>
+            </ion-item>
+            <!--
+            <ion-item class="item-divider">Measurements Submission</ion-item>
+            <div class="row">
+                <div class="col-25" ng-repeat="reading in system.readings">
+                    <a class="button button-positive button-block button-outline" ng-bind="reading.name" ui-sref="main.inputReading({ type: reading.name })"></a>
+                </div>
+            </div>
+            -->
+        </form>
+    </ion-content>
+</ion-view>
