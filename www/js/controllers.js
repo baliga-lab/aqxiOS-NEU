@@ -38,7 +38,7 @@
     });
 
     app.controller('MainController', function($scope, $log) {
-            
+
     });
 
     app.controller('MenuController', function($scope, $log, $state, $ionicHistory, $cookies) {
@@ -101,11 +101,11 @@
             }
             SystemService.getSystem($scope.systemID).then(onSuccess, onFailure);
         }
-        
+
         $scope.inputReading = function(type) {
             $state.go('main.inputReading', { type: type, systemID: $scope.systemID });
         }
-        
+
         $scope.inputAnnotation = function() {
             $state.go('main.inputAnnotation', { systemID: $scope.systemID });
         }
@@ -124,32 +124,88 @@
             };
         }
 
-        function getLux(imageURI, exif) {
-            console.log(imageURI);
-            console.log(exif);
+        function getLux(imageURI, exif, callback) {
+
+            //Parse Exif data
+            var parsedExif = JSON.parse(exif);
+            var isoSpeed = parsedExif.Exif.ISOSpeedRatings;
+            var exposureTime = parsedExif.Exif.ExposureTime;
+            var brightnessValue =  parsedExif.Exif.BrightnessValue;
+
             var image = document.createElement('img');
             var context = document.createElement('canvas').getContext('2d');
             image.src = imageURI;
+
+            var normalAvg = 0.0;
+            var grayscale = 0.0;
+            var imageBrightnessStd = 0.0;
+            var imageBrightnessNonLinear = 0.0;
+            var pixelCount = 0.0;
+            var avgBrightness = 0.0;
+            var totalIlluminance_C750;
+
             image.onload = function() {
+
                 var width =  image.naturalWidth;
                 var height = image.naturalHeight;
                 context.drawImage(image, 0, 0, width, height);
                 var data = context.getImageData(0, 0, width, height).data;
-                var r, g, b, a;
+
                 for (var i = 0; i < data.length; i += 4) {
-                    r = data[i];
-                    g = data[i + 1];
-                    b = data[i + 2];
-                    // a = data[i + 3];
+                    normalAvg = normalAvg + (data[i] + data[i + 1] + data[i + 2]) / 3;
+
+                    grayscale = grayscale + 0.299 * data[i] + 0.587 * data[i + 1] + 0.114
+                       * data[i + 2];
+
+                    imageBrightnessStd = imageBrightnessStd + 0.2126 * data[i] + 0.7152 * data[i + 1]
+                       + 0.0722 * data[i + 2];
+
+                    imageBrightnessNonLinear = imageBrightnessNonLinear + Math.sqrt((Math.pow(data[i], 2) * 0.241
+                       + Math.pow(data[i + 1], 2) * 0.691 + Math.pow(data[i + 2], 2) * 0.068));
+
+                    pixelCount = pixelCount + 1;
                 }
+                    avgBrightness = avgBrightness + (normalAvg/pixelCount);
+                    avgBrightness = avgBrightness + (grayscale/pixelCount);
+                    avgBrightness = avgBrightness + (imageBrightnessStd/pixelCount);
+                    avgBrightness = avgBrightness + (imageBrightnessNonLinear/pixelCount);
+                    avgBrightness = avgBrightness / 4;
+                    console.log(avgBrightness);
+
+
+                    totalIlluminance_C750 = 7500 * Math.pow(avgBrightness, 2) / (0.0929 * isoSpeed / exposureTime);
+
+                   console.log("Inlluminance : "+totalIlluminance_C750);
+                   callback(totalIlluminance_C750);
+//                var oldIlluminance = Math.pow(avgBrightness, 2) / (0.0929);
+//                var totalIlluminance_C112 = Double(112) * Math.pow(avgBrightness, 2) / (0.0929 * isoSpeed / exposureTime);
+//                var totalIlluminance_C1k = Double(1000) * Math.pow(avgBrightness, 2) / (0.0929 * isoSpeed / exposureTime);
+//                var totalIlluminance_C100 = Double(100) * Math.pow(avgBrightness, 2) / (0.0929 * isoSpeed / exposureTime);
+//                var totalIlluminance_C1 = Math.pow(avgBrightness, 2) / (0.0929 * isoSpeed / exposureTime);
+//                var totalIlluminance_C112_192_AB = 112 * Math.pow(1.92, avgBrightness) / (0.0929 * isoSpeed / exposureTime);
+//                var totalIlluminance_AB = Math.pow(avgBrightness, 2) / (0.0929 * isoSpeed / exposureTime);
+//
+//
+//                var totalIlluminance_C750_BV = 750 * Math.pow(brightnessValue, 2) / (0.0929 * isoSpeed / exposureTime);
+//            //outside works
+//                var oldIlluminance_BV = Math.pow(brightnessValue, 2) / (0.0929);
+//                var totalIlluminance_C112_BV = 112 * Math.pow(brightnessValue, 2) / (0.0929 * isoSpeed / exposureTime);
+//                var totalIlluminance_C1_BV = Math.pow(brightnessValue, 2) / (0.0929 * isoSpeed / exposureTime);
+//                var totalIlluminance_C112_192_BV = 112 * Math.pow(1.92, brightnessValue) / (0.0929 * isoSpeed / exposureTime);
+//                var totalIlluminance_BV = Math.pow(brightnessValue, 2) / (0.0929 * isoSpeed / exposureTime);
+//                var totalIlluminance_C100_BV = 100 * Math.pow(brightnessValue, 2) / (0.0929 * isoSpeed / exposureTime);
+
             };
-            return 0;
+
         }
 
         $scope.launchLightMeter = function() {
             function onSuccess(data) {
                 var pdata = JSON.parse(data);
-                $scope.reading.value = getLux(pdata.filename, pdata.json_metadata);
+                 getLux(pdata.filename, pdata.json_metadata, function(illuminanceResult){
+                  console.log(illuminanceResult);
+                  $scope.reading.value = illuminanceResult;
+                });
             }
             function onFailure(error) {
                 $log.error(error);
