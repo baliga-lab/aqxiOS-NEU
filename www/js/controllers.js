@@ -4,7 +4,7 @@
 
     var app = angular.module('aqx');
 
-    app.controller('PortalController', function($rootScope, $scope, $log, $state, $cordovaOauth, $cookies, $http) {
+    app.controller('PortalController', function($rootScope, $scope, $log, $state, $cordovaOauth, $cookies, UserService) {
 
         var clientID = '651960916780-kndehhtq3aooce9ftb0ss4ppbd3irqi1.apps.googleusercontent.com';
         var scopes = ['profile', 'email'];
@@ -19,12 +19,11 @@
                 var accessToken = cookie.access_token;
                 var expires = new Date() + cookie.expires_in * 1000;
                 $cookies.put('accessToken', accessToken, { expires: expires });
-                var url = 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' + accessToken;
-                $http.get(url).then(onSuccess2, onFailure);
+                UserService.getUser(accessToken).then(onSuccess2, onFailure);
             }
-            function onSuccess2(response) {
-                $log.debug(response.data);
-                $rootScope.user = response.data;
+            function onSuccess2(user) {
+                $log.debug(user);
+                $rootScope.user = user;
                 $state.go('main.systems');
             }
             function onFailure(error) {
@@ -73,7 +72,7 @@
             function onFailure(error) {
                 $log.error(error);
             }
-            SystemService.getSystemsForUser($scope.user.id).then(onSuccess, onFailure);
+            SystemService.getSystemsForUser($scope.user.ID).then(onSuccess, onFailure);
         }
 
         $scope.addSystem = function() {
@@ -113,7 +112,7 @@
         $scope.$on('$ionicView.beforeEnter', beforeEnter);
     });
 
-    app.controller('InputReadingController', function($scope, $log, $stateParams, $state, $cordovaCamera, SystemService) {
+    app.controller('InputReadingController', function($scope, $log, $stateParams, $state, $cordovaCamera, SystemService, LightMeterService) {
 
         function beforeEnter() {
             $scope.systemID = $stateParams.systemID;
@@ -124,32 +123,13 @@
             };
         }
 
-        function getLux(imageURI, exif) {
-            console.log(imageURI);
-            console.log(exif);
-            var image = document.createElement('img');
-            var context = document.createElement('canvas').getContext('2d');
-            image.src = imageURI;
-            image.onload = function() {
-                var width =  image.naturalWidth;
-                var height = image.naturalHeight;
-                context.drawImage(image, 0, 0, width, height);
-                var data = context.getImageData(0, 0, width, height).data;
-                var r, g, b, a;
-                for (var i = 0; i < data.length; i += 4) {
-                    r = data[i];
-                    g = data[i + 1];
-                    b = data[i + 2];
-                    // a = data[i + 3];
-                }
-            };
-            return 0;
-        }
-
         $scope.launchLightMeter = function() {
             function onSuccess(data) {
                 var pdata = JSON.parse(data);
-                $scope.reading.value = getLux(pdata.filename, pdata.json_metadata);
+                LightMeterService.computeLux(pdata.filename, pdata.json_metadata).then(onSucces2);
+            }
+            function onSuccess2(lux) {
+                $scope.reading.value = lux;
             }
             function onFailure(error) {
                 $log.error(error);

@@ -3,6 +3,112 @@
     'use strict';
 
     var app = angular.module('aqx');
+    
+    var endpoint = 'http://127.0.0.1:5000/aqxapi/v2/';
+    const USE_MOCK = true;
+    
+    app.factory('UserService', function($http, $q) {
+        
+        var service = {
+            getUser: getUser
+        };
+        
+        function getGoogleProfile(accessToken) {
+            var deferred = $q.defer();
+            function onSuccess(response) {
+                deferred.resolve(response.data);
+            }
+            function onFailure(error) {
+                deferred.reject(error);
+            }
+            var url = 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=' + accessToken;
+            $http.get(url).then(onSuccess, onFailure);
+            return deferred.promise;
+        }
+        
+        function getUser(accessToken) {
+            var deferred = $q.defer();
+            var user = {};
+            function onSuccess(googleProfile) {
+                var googleID = googleProfile.id;
+                user.googleID = googleID;
+                user.name = googleProfile.name;
+                user.email = googleProfile.email;
+                user.picture = googleProfile.picture;
+                $http.get(endpoint + 'user/' + googleID).then(onSuccess2, onFailure);
+            }
+            function onSuccess2(response) {
+                user.ID = response.data.user.id;
+                deferred.resolve(user);
+            }
+            function onFailure(error) {
+                deferred.reject(error);
+            }
+            getGoogleProfile(accessToken).then(onSuccess, onFailure);
+            return deferred.promise;
+        }
+        
+        return service;
+    });
+    
+    app.factory('LightMeterService', function ($q) {
+        
+        var service = {
+            computeLux: computeLux
+        }
+        
+        function computeLux(imageURI, exif) {
+            var deferred = $q.defer();
+            
+            var exif = JSON.parse(exif).Exif;
+            var ISO = exif.ISOSpeedRatings;
+            var exposure = exif.ExposureTime;
+            var brightnessValue = exif.BrightnessValue;
+            
+            var image = document.createElement('img');
+            var context = document.createElement('canvas').getContext('2d');
+            image.src = imageURI;
+            
+            const illuminance = 7500;
+            
+            var normalAverage = 0.0;
+            var grayscale = 0.0;
+            var imageBrightnessStd = 0.0;
+            var imageBrightnessNonLinear = 0.0;
+            var pixelCount = 0;
+            var averageBrightness = 0.0;
+            
+            image.onload = function() {
+                var width = image.naturalWidth;
+                var height = image.naturalHeight;
+                context.drawImage(image, 0, 0, width, height);
+                var data = context.getImageData(0, 0, width, height).data;
+                var r, g, b, a;
+                
+                for (var i = 0; i < data.length; i += 4) {
+                    
+                    r = data[i];
+                    g = data[i + 1];
+                    b = data[i + 2];
+                    
+                    normalAverage += (r + g + b) / 3.0;
+                    grayscale += 0.299 * r + 0.587 * g + 0.114 * b;
+                    imageBrightnessStd += 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                    imageBrightnessNonLinear += Math.sqrt( 0.241 * Math.pow(r, 2) + 0.691 * Math.pow(g, 2) + 0.068 * Math.pow(b, 2) );
+                    pixelCount += 1;    
+                }
+                
+                averageBrightness += (normalAverage + grayscale + imageBrightnessStd + imageBrightnessNonLinear) / (4 * pixelCount);
+                totalIlluminance = illuminance * Math.pow(averageBrightness, 2) / (0.0929 * ISO / exposure);
+                
+                deferred.resolve(totalIlluminance);  
+            }
+            
+            return deferred.promise;
+        }
+        
+        return service;
+    });
 
     app.factory('SystemService', function($http, $q) {
 
@@ -88,32 +194,36 @@
 
         function getSystemsForUser(userID) {
             var deferred = $q.defer();
-            function onSuccess(systems) {
-                deferred.resolve(systems);
+            function onSuccess(response) {
+                deferred.resolve(response.data.systems);
             }
             function onFailure(error) {
                 deferred.reject(error);
             }
             // THE FOLLOWING ARE MOCK DATA
-            onSuccess([
-                {
-                    ID: '1',
-                    name: 'Test1'
-                },
-                {
-                    ID: '2',
-                    name: 'Test2'
-                },
-                {
-                    ID: '3',
-                    name: 'Test3'
-                }
-            ]);
-            
+            if (USE_MOCK) {
+                onSuccess([
+                    {
+                        ID: '1',
+                        name: 'Test1'
+                    },
+                    {
+                        ID: '2',
+                        name: 'Test2'
+                    },
+                    {
+                        ID: '3',
+                        name: 'Test3'
+                    }
+                ]);    
+            }
+            else {
+                $http.get(endpoint + 'user/' + userID + '/system').then(onSuccess, onFailure);
+            }
             return deferred.promise;
         }
 
-        function getSystem(systemID) {
+        function getSystem(systemUID) {
             var deferred = $q.defer();
             function onSuccess(system) {
                 deferred.resolve(system);
@@ -122,25 +232,29 @@
                 deferred.reject(error);
             }
             // THE FOLLOWING ARE MOCK DATA
-            var readings = [];
-            var measurement;
-            for (var i = 0; i < measurements.length; i++) {
-                measurement = measurements[i];
-                measurement.max = measurement.max || 140;
-                measurement.min = measurement.min || 60;
-                readings.push({
-                    name: measurement.name,
-                    value: measurement.min + Math.random() * (measurement.max - measurement.min),
-                    unit: measurement.unit
-                });
+            if (USE_MOCK) {
+                var readings = [];
+                var measurement;
+                for (var i = 0; i < measurements.length; i++) {
+                    measurement = measurements[i];
+                    measurement.max = measurement.max || 140;
+                    measurement.min = measurement.min || 60;
+                    readings.push({
+                        name: measurement.name,
+                        value: measurement.min + Math.random() * (measurement.max - measurement.min),
+                        unit: measurement.unit
+                    });
+                }
+                var system = {
+                    ID: systemUID,
+                    name: systemUID,
+                    readings: readings
+                };
+                onSuccess(system);    
             }
-            var system = {
-                ID: systemID,
-                name: 'Test' + systemID,
-                readings: readings
-            };
-            onSuccess(system);
-            
+            else {
+                $http.get(endpoint + 'system/' + systemUID)    
+            }
             return deferred.promise;
         }
 
