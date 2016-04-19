@@ -4,8 +4,9 @@
 
     var app = angular.module('aqx');
     
-    var endpoint = 'http://127.0.0.1:5000/aqxapi/v2/';
-    const USE_MOCK = true;
+    var host = 'http://127.0.0.1:5000'
+    var endpoint = host + '/aqxapi/v2/';
+    var USE_MOCK = true;
     
     app.factory('UserService', function($http, $q) {
         
@@ -35,7 +36,13 @@
                 user.name = googleProfile.name;
                 user.email = googleProfile.email;
                 user.picture = googleProfile.picture;
-                $http.get(endpoint + 'user/' + googleID).then(onSuccess2, onFailure);
+                if (USE_MOCK) {
+                    deferred.resolve(user);
+                }
+                else {
+                    $http.get(endpoint + 'user/' + googleID).then(onSuccess2, onFailure);    
+                }
+                
             }
             function onSuccess2(response) {
                 user.ID = response.data.user.id;
@@ -69,14 +76,12 @@
             var context = document.createElement('canvas').getContext('2d');
             image.src = imageURI;
             
-            const illuminance = 7500;
+            var illuminance = 7500;
             
             var normalAverage = 0.0;
             var grayscale = 0.0;
             var imageBrightnessStd = 0.0;
             var imageBrightnessNonLinear = 0.0;
-            var pixelCount = 0;
-            var averageBrightness = 0.0;
             
             image.onload = function() {
                 var width = image.naturalWidth;
@@ -84,6 +89,7 @@
                 context.drawImage(image, 0, 0, width, height);
                 var data = context.getImageData(0, 0, width, height).data;
                 var r, g, b, a;
+                var pixelCount = data.length / 4;
                 
                 for (var i = 0; i < data.length; i += 4) {
                     
@@ -91,15 +97,16 @@
                     g = data[i + 1];
                     b = data[i + 2];
                     
-                    normalAverage += (r + g + b) / 3.0;
+                    // normalAverage += (r + g + b) / 3.0;
                     grayscale += 0.299 * r + 0.587 * g + 0.114 * b;
-                    imageBrightnessStd += 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                    imageBrightnessNonLinear += Math.sqrt( 0.241 * Math.pow(r, 2) + 0.691 * Math.pow(g, 2) + 0.068 * Math.pow(b, 2) );
-                    pixelCount += 1;    
+                    // imageBrightnessStd += 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                    // imageBrightnessNonLinear += Math.sqrt( 0.241 * Math.pow(r, 2) + 0.691 * Math.pow(g, 2) + 0.068 * Math.pow(b, 2) );
+                    pixelCount += 1;
                 }
                 
-                averageBrightness += (normalAverage + grayscale + imageBrightnessStd + imageBrightnessNonLinear) / (4 * pixelCount);
-                totalIlluminance = illuminance * Math.pow(averageBrightness, 2) / (0.0929 * ISO / exposure);
+                // averageBrightness += (normalAverage + grayscale + imageBrightnessStd + imageBrightnessNonLinear) / (4 * pixelCount);
+                var averageBrightness = grayscale / pixelCount;
+                var totalIlluminance = illuminance * Math.pow(averageBrightness, 2) / (0.0929 * ISO / exposure);
                 
                 deferred.resolve(totalIlluminance);  
             }
@@ -115,6 +122,7 @@
         var service = {
             getSystemsForUser: getSystemsForUser,
             getSystem: getSystem,
+            getReadingsForSystem: getReadingsForSystem,
             submitReading: submitReading,
             submitAnnotation: submitAnnotation
         };
@@ -195,7 +203,7 @@
         function getSystemsForUser(userID) {
             var deferred = $q.defer();
             function onSuccess(response) {
-                deferred.resolve(response.data.systems);
+                deferred.resolve(response);
             }
             function onFailure(error) {
                 deferred.reject(error);
@@ -257,13 +265,35 @@
             }
             return deferred.promise;
         }
+        
+        function getReadingsForSystem(systemUID) {
+            function onSuccess(response) {
+                
+            }
+            function onFailure(error) {
+                
+            }
+            // $http.get(endpoint + 'system/' + systemUID + '/reading').then(onSuccess, onResponse);
+        }
 
-        function submitReading(systemID, type, reading) {
-            
+        function submitReading(systemUID, type, reading) {
+            function onSuccess(response) {
+                
+            }
+            function onFailure(error) {
+                
+            }
+            // $http.post(endpoint + 'system/' + systemUID + '/reading/' + type, reading).then(onSuccess, onFailure);
         }
         
-        function submitAnnotation(systemID, annotationID, timestamp) {
-            
+        function submitAnnotation(systemID, annotation) {
+            function onSuccess(response) {
+                
+            }
+            function onFailure(error) {
+                
+            }
+            // $http.post(endpoint + 'system/' + systemID + '/annotation', annotation).then(onSuccess, onFailure);
         }
 
         return service;

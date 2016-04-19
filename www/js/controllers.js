@@ -112,7 +112,7 @@
         $scope.$on('$ionicView.beforeEnter', beforeEnter);
     });
 
-    app.controller('InputReadingController', function($scope, $log, $stateParams, $state, $cordovaCamera, SystemService, LightMeterService) {
+    app.controller('InputReadingController', function($scope, $log, $stateParams, $state, $cordovaCamera, SystemService, LightMeterService, $ionicLoading) {
 
         function beforeEnter() {
             $scope.systemID = $stateParams.systemID;
@@ -126,9 +126,12 @@
         $scope.launchLightMeter = function() {
             function onSuccess(data) {
                 var pdata = JSON.parse(data);
-                LightMeterService.computeLux(pdata.filename, pdata.json_metadata).then(onSucces2);
+                LightMeterService.computeLux(pdata.filename, pdata.json_metadata).then(onSuccess2);
+                $ionicLoading.show({ template: 'Computing...' })
             }
             function onSuccess2(lux) {
+                $ionicLoading.hide();
+                console.log(lux);
                 $scope.reading.value = lux;
             }
             function onFailure(error) {
