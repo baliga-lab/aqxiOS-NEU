@@ -76,7 +76,7 @@
             var context = document.createElement('canvas').getContext('2d');
             image.src = imageURI;
 
-            var illuminance = 7500;
+            var illuminance = 750;
             var grayscale = 0.0;
 //            var normalAverage = 0.0;
 //            var imageBrightnessStd = 0.0;
@@ -98,16 +98,15 @@
                     b = data[i + 2];
 
                     grayscale += 0.299 * r + 0.587 * g + 0.114 * b;
-                    // normalAverage += (r + g + b) / 3.0;
-                    // imageBrightnessStd += 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                    // imageBrightnessNonLinear += Math.sqrt( 0.241 * Math.pow(r, 2) + 0.691 * Math.pow(g, 2) + 0.068 * Math.pow(b, 2) );
+//                     normalAverage += (r + g + b) / 3.0;
+//                     imageBrightnessStd += 0.2126 * r + 0.7152 * g + 0.0722 * b;
+//                     imageBrightnessNonLinear += Math.sqrt( 0.241 * Math.pow(r, 2) + 0.691 * Math.pow(g, 2) + 0.068 * Math.pow(b, 2) );
                     pixelCount += 1;
                 }
-
                 var averageBrightness = grayscale / pixelCount;
 
-                if(brightnessValue > 4) {
-                  totalIlluminance = illuminance * Math.pow(brightnessValue, 2) / (ISO * 0.25083);
+                if(brightnessValue > 3) {
+                  totalIlluminance = illuminance * Math.pow(brightnessValue, 2) / (ISO * 0.4);
                   console.log("totalIlluminance of bright surrounding::  " + totalIlluminance);
                 } else {
                   totalIlluminance = Math.pow(brightnessValue, 2) / (0.0929);
