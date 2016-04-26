@@ -213,6 +213,14 @@
                     {
                         key: 'Growbed Media',
                         value: data.gbMedia.map(function (medium) { return medium.name }).join(', ')
+                    },
+                    {
+                        key: 'Crops',
+                        value: data.crops.map(function (crop) { return crop.count + ' ' + crop.name }).join(', ')
+                    },
+                    {
+                        key: 'Organisms',
+                        value: data.organisms.map(function (organism) { return organism.count + ' ' + organism.name }).join(', ')
                     }
                 ]
                 deferred.resolve(metadata);

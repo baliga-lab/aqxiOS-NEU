@@ -6,7 +6,7 @@
 
     app.controller('PortalController', function($rootScope, $scope, $log, $state, $cordovaOauth, $cookies, UserService) {
 
-        var clientID = '651960916780-kndehhtq3aooce9ftb0ss4ppbd3irqi1.apps.googleusercontent.com';
+        var clientID = '75692667349-39hlipha81a3v40du06184k75ajl8u4u.apps.googleusercontent.com';
         var scopes = ['profile', 'email'];
 
         function beforeEnter() {
@@ -131,7 +131,7 @@
         $scope.$on('$ionicView.beforeEnter', beforeEnter);
     });
 
-    app.controller('InputReadingController', function($scope, $log, $stateParams, $state, $cordovaCamera, SystemService, LightMeterService) {
+    app.controller('InputReadingController', function($scope, $log, $stateParams, $state, $cordovaCamera, $ionicHistory, $ionicLoading, SystemService, LightMeterService) {
 
         function beforeEnter() {
             $scope.systemID = $stateParams.systemID;
@@ -149,10 +149,12 @@
                 LightMeterService.computeLux(pdata.filename, pdata.json_metadata).then(onSuccess2);
             }
             function onSuccess2(lux) {
+                $ionicLoading.hide();
                 console.log(lux);
                 $scope.reading.value = lux;
             }
             function onFailure(error) {
+                $ionicLoading.hide();
                 $log.error(error);
                 $scope.response = error;
             }
@@ -167,12 +169,14 @@
                 correctOrientation: true,
                 cameraDirection: Camera.Direction.BACK
             };
+            $ionicLoading.show({ template: 'Computing...' });
             $cordovaCamera.getPicture(options).then(onSuccess, onFailure);
         };
 
         $scope.submitReading = function(reading) {
             function onSuccess(response) {
                 $log.debug(response);
+                $ionicHistory.goBack();
             }
             function onFailure(error) {
                 $log.error(error);
@@ -183,19 +187,22 @@
         $scope.$on('$ionicView.beforeEnter', beforeEnter);
     });
 
-    app.controller('InputAnnotationController', function($scope, $log, $stateParams, $state, SystemService) {
+    app.controller('InputAnnotationController', function($scope, $log, $stateParams, $state, $ionicHistory, SystemService) {
 
         function beforeEnter() {
-            $scope.type = $stateParams.type;
+            $scope.systemID = $stateParams.systemID;
+            $scope.systemUID = $stateParams.systemUID;
+            console.log($stateParams);
             $scope.annotation = {
-                date: Date.now(),
-                time: Date.now()
+                date: new Date(),
+                time: new Date()
             };
         }
 
         $scope.submitAnnotation = function(annotation) {
             function onSuccess(response) {
                 $log.debug(response);
+                $ionicHistory.goBack();
             }
             function onFailure(error) {
                 $log.error(error);
