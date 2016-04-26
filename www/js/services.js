@@ -263,7 +263,10 @@
             function onFailure(error) {
                 deferred.reject(error);
             }
-            reading.timestamp = new Date(reading.date.getTime() + reading.time.getTime());
+            reading.timestamp = new Date(
+                reading.date.getFullYear(), reading.date.getMonth(), reading.date.getDate(), 
+                reading.time.getHours(), reading.time.getMinutes(), reading.time.getSeconds(), reading.time.getMilliseconds());
+            console.log(reading);
             $http.post(endpoint + 'system/' + systemUID + '/reading/' + type, reading).then(onSuccess, onFailure);
             return deferred.promise;
         }
@@ -276,7 +279,10 @@
             function onFailure(error) {
                 deferred.reject(error);
             }
-            annotation.timestamp = new Date(annotation.date.getTime() + annotation.time.getTime());
+            annotation.timestamp = new Date(
+                annotation.date.getFullYear(), annotation.date.getMonth(), annotation.date.getDate(), 
+                annotation.time.getHours(), annotation.time.getMinutes(), annotation.time.getSeconds(), annotation.time.getMilliseconds());
+            console.log(annotation);
             $http.post(endpoint + 'system/' + systemID + '/annotation', annotation).then(onSuccess, onFailure);
             return deferred.promise;
         }
