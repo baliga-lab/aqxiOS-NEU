@@ -2,7 +2,7 @@
     <ion-nav-title>Systems</ion-nav-title>
     <ion-content>
         <ion-list>
-            <ion-item ng-repeat="system in systems" ng-bind="system.name" ng-click="viewSystem(system.ID)"></ion-item>
+            <ion-item ng-repeat="system in systems" ng-bind="system.name" ng-click="viewSystem(system.ID, system.UID)"></ion-item>
         </ion-list>
     </ion-content>
 </ion-view>

@@ -49,7 +49,7 @@
         });
 
         $stateProvider.state('main.systemOverview', {
-            url: '/system/:systemID',
+            url: '/system/:systemID/:systemUID',
             views: {
                 'menu': {
                     templateUrl: 'templates/menu.html',
@@ -63,7 +63,7 @@
         });
 
         $stateProvider.state('main.inputReading', {
-            url: '/system/:systemID/input/reading/:type',
+            url: '/system/:systemID/:systemUID/input/reading/:type',
             views: {
                 'menu': {
                     templateUrl: 'templates/menu.html',
@@ -77,7 +77,7 @@
         });
         
         $stateProvider.state('main.inputAnnotation', {
-            url: '/system/:systemID/input/annotation',
+            url: '/system/:systemID/:systemUID/input/annotation',
             views: {
                 'menu': {
                     templateUrl: 'templates/menu.html',

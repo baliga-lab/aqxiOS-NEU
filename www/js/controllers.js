@@ -63,10 +63,11 @@
         ];
     });
 
-    app.controller('SystemsController', function($rootScope, $scope, $log, $state, SystemService) {
+    app.controller('SystemsController', function($scope, $log, $state, SystemService) {
 
-        function fetchSystems() {
+        function beforeEnter() {
             function onSuccess(systems) {
+                console.log(systems);
                 $scope.systems = systems;
             }
             function onFailure(error) {
@@ -79,18 +80,23 @@
             $state.go('main.systems.editSystem')
         };
 
-        $scope.viewSystem = function(systemID) {
-            $rootScope.systemID = systemID;
-            $state.go('main.systemOverview', { systemID: systemID });
+        $scope.viewSystem = function(systemID, systemUID) {
+            $state.go('main.systemOverview', { systemID: systemID, systemUID: systemUID });
         };
 
-        $scope.$on('$ionicView.beforeEnter', fetchSystems);
+        $scope.$on('$ionicView.beforeEnter', beforeEnter);
     });
 
     app.controller('OverviewController', function($scope, $log, $stateParams, $state, SystemService) {
-
+        
         function beforeEnter() {
             $scope.systemID = $stateParams.systemID;
+            $scope.systemUID = $stateParams.systemUID;
+            fetchSystem();
+            fetchReadings();
+        }
+        
+        function fetchSystem() {
             function onSuccess(system) {
                 $log.debug(system);
                 $scope.system = system;
@@ -98,24 +104,38 @@
             function onFailure(error) {
                 $log.error(error);
             }
-            SystemService.getSystem($scope.systemID).then(onSuccess, onFailure);
+            $log.log('Fetching metadata for ' + $scope.systemUID);
+            SystemService.getSystem($scope.systemUID).then(onSuccess, onFailure);
+        }
+        
+        function fetchReadings() {
+            function onSuccess(readings) {
+                $log.debug(readings);
+                $scope.readings = readings;
+            }
+            function onFailure(error) {
+                $log.error(error);
+            }
+            $log.log('Fetching readings for ' + $scope.systemUID);
+            SystemService.getReadingsForSystem($scope.systemUID).then(onSuccess, onFailure);
         }
         
         $scope.inputReading = function(type) {
-            $state.go('main.inputReading', { type: type, systemID: $scope.systemID });
+            $state.go('main.inputReading', { type: type, systemID: $scope.systemID, systemUID: $scope.systemUID });
         }
         
         $scope.inputAnnotation = function() {
-            $state.go('main.inputAnnotation', { systemID: $scope.systemID });
+            $state.go('main.inputAnnotation', { systemID: $scope.systemID, systemUID: $scope.systemUID });
         }
 
         $scope.$on('$ionicView.beforeEnter', beforeEnter);
     });
 
-    app.controller('InputReadingController', function($scope, $log, $stateParams, $state, $cordovaCamera, SystemService, LightMeterService, $ionicLoading) {
+    app.controller('InputReadingController', function($scope, $log, $stateParams, $state, $cordovaCamera, SystemService, LightMeterService) {
 
         function beforeEnter() {
             $scope.systemID = $stateParams.systemID;
+            $scope.systemUID = $stateParams.systemUID;
             $scope.type = $stateParams.type;
             $scope.reading = {
                 date: new Date(),
@@ -127,10 +147,8 @@
             function onSuccess(data) {
                 var pdata = JSON.parse(data);
                 LightMeterService.computeLux(pdata.filename, pdata.json_metadata).then(onSuccess2);
-                $ionicLoading.show({ template: 'Computing...' })
             }
             function onSuccess2(lux) {
-                $ionicLoading.hide();
                 console.log(lux);
                 $scope.reading.value = lux;
             }
@@ -154,12 +172,12 @@
 
         $scope.submitReading = function(reading) {
             function onSuccess(response) {
-
+                $log.debug(response);
             }
             function onFailure(error) {
-
+                $log.error(error);
             }
-            SystemService.submitReading($scope.systemID, $scope.type, $scope.reading).then(onSuccess, onFailure);
+            SystemService.submitReading($scope.systemUID, $scope.type, $scope.reading).then(onSuccess, onFailure);
         };
 
         $scope.$on('$ionicView.beforeEnter', beforeEnter);
@@ -169,7 +187,7 @@
 
         function beforeEnter() {
             $scope.type = $stateParams.type;
-            $scope.reading = {
+            $scope.annotation = {
                 date: Date.now(),
                 time: Date.now()
             };
@@ -177,12 +195,12 @@
 
         $scope.submitAnnotation = function(annotation) {
             function onSuccess(response) {
-
+                $log.debug(response);
             }
             function onFailure(error) {
-
+                $log.error(error);
             }
-            SystemService.submitAnnotation($scope.systemID, $scope.type, $scope.reading).then(onSuccess, onFailure);
+            SystemService.submitAnnotation($scope.systemID, $scope.annotation).then(onSuccess, onFailure);
         }
 
         $scope.$on('$ionicView.beforeEnter', beforeEnter);
