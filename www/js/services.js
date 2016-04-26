@@ -133,53 +133,43 @@
 
             alkalinity: {
                 name: 'Alkalinity',
-                type: 'alkalinity',
                 unit: 'mg/L'
             },
             ammonium: {
                 name: 'Ammonium',
-                type: 'ammonium',
                 unit: 'mg/L'
             },
             chlorine: {
                 name: 'Chlorine',
-                type: 'chlorine',
                 unit: 'mg/L'
             },
             hardness: {
                 name: 'Hardness',
-                type: 'hardness',
                 unit: 'mg/L'
             },
             light: {
                 name: 'Light',
-                type: 'light',
                 unit: 'lux',
             },
             nitrate: {
                 name: 'Nitrate',
-                type: 'nitrate',
                 unit: 'mg/L'
             },
             nitrite: {
                 name: 'Nitrite',
-                type: 'nitrite',
                 unit: 'mg/L'
             },
             o2: {
                 name: 'Oxygen',
-                type: 'o2',
                 unit: 'mg/L'
             },
             ph: {
                 name: 'pH',
-                type: 'ph',
                 unit: null
             },
             temp: {
                 name: 'Temperature',
-                type: 'temp',
-                unit: '°C',
+                unit: '°C'
             }
         };
 
@@ -238,12 +228,14 @@
             var deferred = $q.defer();
             function onSuccess(response) {
                 var readings = [];
-                for (var r in response.data) {
+                var r, datum;
+                for (r in response.data) {
+                    datum = response.data[r];
                     readings.push({
-                        name: measurements[r].name,
-                        value: response.data[r],
-                        unit: measurements[r].unit,
-                        type: measurements[r].type
+                        name: measurements[datum.name].name,
+                        value: datum.value,
+                        unit: measurements[datum.name].unit,
+                        type: datum.name
                     });
                 }
                 deferred.resolve(readings);
