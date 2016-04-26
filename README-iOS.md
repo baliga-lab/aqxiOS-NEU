@@ -3,6 +3,7 @@ Requirements:
 * npm: included with installation of NodeJS
 * Apache Cordova: run `npm install -g cordova`
 * Ionic CLI: run `npm install -g ionic`
+* macOS
 * Xcode
 
 To compile:
