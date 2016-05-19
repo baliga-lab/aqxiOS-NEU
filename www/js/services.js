@@ -102,11 +102,11 @@
                 var averageBrightness = grayscale / pixelCount;
 
                 if (brightnessValue > 3) {
-                    totalIlluminance = illuminance * Math.pow(brightnessValue, 2) / (ISO * 0.4);
+                    totalIlluminance = illuminance * Math.pow(averageBrightness, 2) / (ISO * 0.4);
                     console.log("totalIlluminance of bright surrounding::  " + totalIlluminance);
                 }
                 else {
-                    totalIlluminance = Math.pow(brightnessValue, 2) / (0.0929);
+                    totalIlluminance = Math.pow(averageBrightness, 2) / (0.0929);
                     console.log("totalIlluminance of dark surrounding::  " + totalIlluminance);
                 }
 
